@@ -2,7 +2,7 @@
 
 ContribAI is an LLM-powered Open Source Contribution Assistant designed to help maintainers and contributors discover and propose high-quality GitHub issues. It systematically scans repositories for deterministic signals and uses generative AI to draft clear, helpful, and professional issues.
 
-![ContribAI Dashboard](<img width="2555" height="1183" alt="Image" src="https://github.com/user-attachments/assets/4fa9cb4b-b12f-4990-b2a1-9348fe5ecede" />)
+![ContribAI Dashboard](https://github.com/user-attachments/assets/4fa9cb4b-b12f-4990-b2a1-9348fe5ecede)
 
 ## 🚀 Features
 
