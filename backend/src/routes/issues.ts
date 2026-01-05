@@ -1,5 +1,5 @@
 import express from 'express';
-import { IssueCandidate, Signal } from '../models';
+import { IssueCandidate, Signal, Repository } from '../models';
 import { IssueService } from '../services/IssueService';
 
 const router = express.Router();
@@ -16,14 +16,14 @@ router.get('/', async (req, res) => {
 
     const issues = await IssueCandidate.findAll({
         where,
-        include: [Signal],
+        include: [Signal, Repository],
         order: [['confidence_score', 'DESC']]
     });
     res.json(issues);
 });
 
 router.get('/:id', async (req, res) => {
-    const issue = await IssueCandidate.findByPk(req.params.id, { include: [Signal] });
+    const issue = await IssueCandidate.findByPk(req.params.id, { include: [Signal, Repository] });
     if (!issue) return res.status(404).json({ error: 'Not found' });
     res.json(issue);
 });

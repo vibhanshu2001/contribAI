@@ -25,48 +25,16 @@ function decrypt(text: string): string {
     decrypted = Buffer.concat([decrypted, decipher.final()]);
     return decrypted.toString();
 }
-
 export class AuthService {
-    static async getGitHubAccessToken(code: string): Promise<string> {
-        const response = await axios.post('https://github.com/login/oauth/access_token', {
-            client_id: config.github.clientId,
-            client_secret: config.github.clientSecret,
-            code,
-        }, {
-            headers: { Accept: 'application/json' }
-        });
-
-        if (response.data.error) {
-            throw new Error(response.data.error_description || 'Failed to exchange code');
-        }
-        return response.data.access_token;
-    }
-
-    static async getGitHubUser(accessToken: string): Promise<any> {
-        const response = await axios.get('https://api.github.com/user', {
-            headers: { Authorization: `Bearer ${accessToken}` }
-        });
-        return response.data;
-    }
-
-    static async handleLogin(code: string) {
-        const accessToken = await this.getGitHubAccessToken(code);
-        const ghUser = await this.getGitHubUser(accessToken);
-
-        const [user, created] = await User.findOrCreate({
-            where: { github_id: String(ghUser.id) },
+    static async handleLogin() {
+        // Mock default user for MVP
+        const [user] = await User.findOrCreate({
+            where: { github_id: 'guest_id' },
             defaults: {
-                github_username: ghUser.login,
-                oauth_token_encrypted: encrypt(accessToken)
+                github_username: 'guest_user',
+                oauth_token_encrypted: 'mock_token'
             }
         });
-
-        if (!created) {
-            // Update token if user exists
-            user.github_username = ghUser.login;
-            user.oauth_token_encrypted = encrypt(accessToken);
-            await user.save();
-        }
 
         // Generate JWT for our app
         const token = jwt.sign(
@@ -79,7 +47,7 @@ export class AuthService {
     }
 
     static decryptToken(encryptedToken: string): string {
-        return decrypt(encryptedToken);
+        return encryptedToken; // No-op for mock
     }
 
     static verifyToken(token: string) {

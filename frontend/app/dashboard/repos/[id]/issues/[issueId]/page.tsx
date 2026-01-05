@@ -32,6 +32,10 @@ interface Issue {
     category: string;
     confidence_score: number;
     github_issue_url?: string;
+    Repository?: {
+        owner: string;
+        name: string;
+    };
     Signal?: {
         file_path: string;
         line_number: number;
@@ -88,16 +92,28 @@ export default function IssueDetailPage() {
     };
 
     const handlePublish = async () => {
-        if (!confirm("Are you sure you want to publish this issue to GitHub?")) return;
+        if (!issue?.Repository) return;
+
+        // Construct GitHub URL
+        const owner = issue.Repository.owner;
+        const name = issue.Repository.name;
+        const encodedTitle = encodeURIComponent(title);
+        const encodedBody = encodeURIComponent(body);
+        const githubUrl = `https://github.com/${owner}/${name}/issues/new?title=${encodedTitle}&body=${encodedBody}`;
+
+        // Open GitHub in new tab
+        window.open(githubUrl, '_blank');
+
+        // Mark as published internally
         setSaving(true);
         try {
             await IssueApi.publish(issueId);
-            toast.success("Issue published to GitHub!");
-            router.push(`/dashboard/repos/${repoId}/issues`);
+            toast.success("Redirected to GitHub! Status updated to Published.");
+            await loadIssue();
         } catch (error: unknown) {
             const err = error as { response?: { data?: { error?: string } }; message: string };
             const message = err.response?.data?.error || err.message;
-            toast.error(`Failed to publish: ${message}`);
+            toast.error(`Failed to update status: ${message}`);
         } finally {
             setSaving(false);
         }
@@ -175,8 +191,8 @@ export default function IssueDetailPage() {
                                 disabled={saving}
                                 className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-green-500/30 transition hover:shadow-xl hover:shadow-green-500/40 disabled:opacity-50"
                             >
-                                <Send className="h-4 w-4" />
-                                Publish to GitHub
+                                <ExternalLink className="h-4 w-4" />
+                                Propose on GitHub
                             </button>
                         </>
                     )}
